@@ -1,4 +1,5 @@
 /*Tiny 6502 Like CPU Assembler By Salvatore Di Vincenzo 08/10/2016*/
+
 src_code={}
 bin_code={}
 
