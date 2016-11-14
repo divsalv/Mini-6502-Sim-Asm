@@ -1,0 +1,5 @@
+LDY 255
+DEY
+CMY 1
+BNE 2
+BRK

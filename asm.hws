@@ -1,0 +1,95 @@
+/*Tiny 6502 Like CPU Assembler By Salvatore Di Vincenzo 08/10/2016*/
+src_code={}
+bin_code={}
+
+Function Assembla(Linea)
+	Linea2=LeftStr(Linea,3)
+	Switch(Linea2)
+		Case "BRK":
+			WriteInt(2,0)	
+			Break
+		Case "LDA":
+			WriteInt(2,1)
+			Local inte1=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,inte1)
+			Break
+		Case "ADC":
+			WriteInt(2,2)
+			Local inte2=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,Inte2)
+			Break
+		Case "STA":
+			WriteInt(2,3)
+			Local inte3=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,inte3)
+			Break
+		Case "LDX":
+			WriteInt(2,4)
+			Local inte4=ToNumber(UnrightStr(Linea,4))
+			DebugPrint(inte4)
+			WriteInt(2,inte4)
+			Break
+		Case "INX":
+			WriteInt(2,5)
+			Break
+		Case "CMY":
+			WriteInt(2,6)
+			Local inte44=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,inte44)
+			Break
+		Case "BNE":
+			WriteInt(2,7)	
+			Local inte5=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,inte5)
+			Break		
+		Case "TAX":
+			WriteInt(2,8)
+			Break
+		Case "DEY":
+			WriteInt(2,9)
+			Break
+		Case "LDY":
+			WriteInt(2,10)
+			Local inte6=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,Inte6)
+			Break
+		Case "JSR":
+			WriteInt(2,11)
+			Local inte7=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,Inte7)
+			Break
+		Case "RTS":	 
+			WriteInt(2,12)
+			Break
+		Default:
+			DebugPrint("Errore di istruzione.")
+			Break
+	EndSwitch
+EndFunction
+
+Function Open_src()
+	file1$ = FileRequest("Select some files", "sasm")
+	OpenFile(1, file1$)
+
+	While Not Eof(1) 
+		src_code[tt]=ReadLine(1)
+		tt=tt+1
+	Wend
+	
+	src_size=TableItems(src_code)-1
+	;DebugPrint(src_size)
+	CloseFile(1)
+EndFunction
+
+Function write_bin()
+	file2$ = FileRequest("Inserire nome file!", "out",#REQ_SAVEMODE)
+	OpenFile(2, file2$,#MODE_WRITE)
+	For Local i=0 To src_size Step 1
+		Assembla(src_code[i])
+	Next	
+	CloseFile(2)
+EndFunction
+
+Open_src()
+write_bin()
+

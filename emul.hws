@@ -1,0 +1,156 @@
+/**********************************************************
+* Tiny 6502 Simulator By Salvatore Di Vincenzo 08/10/2016 *
+**********************************************************/
+
+Video_Def=200
+PC_Def=10000 ;Indirizzo in cui si carica il prog
+CPU={}
+CPU.REG={a=0,x=0,y=0,PC=PC_Def}
+CPU.REG.Flags=0
+CPU.SP=0
+
+posx={0,10/2,20/2,30/2,40/2,50/2,60/2,70/2,80/2,90/2,100/2,110/2,120/2,130/2,140/2,150/2,160/2,170/2,180/2,190/2}
+posy={0,10/2,20/2,30/2,40/2,50/2,60/2,70/2,80/2,90/2,100/2,110/2,120/2,130/2,140/2,150/2,160/2,170/2,180/2,190/2}
+colori={#BLACK,#WHITE,#RED,#MAROON,#PURPLE,#GREEN,#BLUE,#YELLOW,#OLIVE,#FUCHSIA,$707070,#GRAY,#LIME,#AQUA,#SILVER}
+SetFillStyle(#FILLCOLOR)
+
+AllocMem(1, 32768) ;Allocamento di 32k
+
+exec_state=1 ;Stato settato su attivo, 0 per inattivo
+
+Function CPU.Opcode(istuz)
+	Switch istuz
+	    Case 0:
+      	;BRK
+        exec_state=0 
+				;Break  
+      Case 1:
+        ;LDA
+				CPU.REG.a=Peek(1,CPU.REG.PC+1,#BYTE)
+				CPU.REG.PC=CPU.REG.PC+2
+				;Break
+      Case 2:
+        ;ADC
+	 			CPU.REG.a=CPU.REG.a+Peek(1,CPU.REG.PC+1,#BYTE)
+				CPU.REG.PC=CPU.REG.PC+2
+        ;Break
+      Case 3:
+        ;STA
+				Poke(1,Peek(1,CPU.REG.PC+1,#BYTE),CPU.REG.a,#BYTE)
+				CPU.REG.PC=CPU.REG.PC+2
+        ;Break
+      Case 4:
+        ;LDX
+				CPU.REG.x=Peek(1,CPU.REG.PC+1,#BYTE)
+				CPU.REG.PC=CPU.REG.PC+2
+        ;Break
+      Case 5:
+        ;INX
+				CPU.REG.x=CPU.REG.x+1
+				CPU.REG.PC=CPU.REG.PC+1
+        ;Break
+      Case 6:
+        ;CMY
+       	 If CPU.REG.y=Peek(1,CPU.REG.PC+1,#BYTE)
+						CPU.REG.Flags=1
+					Else
+						CPU.REG.Flags=0
+					EndIf
+					CPU.REG.PC=CPU.REG.PC+2	
+				;Break
+      Case 7:
+        ;BNE
+        If CPU.REG.Flags<>1
+			  	CPU.REG.PC=PC_Def+Peek(1,CPU.REG.PC+1,#BYTE)
+			  Else
+			  	CPU.REG.Flags=0
+			  	CPU.REG.PC=CPU.REG.PC+2
+				EndIf
+				;Break
+      Case 8:
+        ;TAX
+				CPU.REG.x=CPU.REG.a
+				CPU.REG.PC=CPU.REG.PC+1
+				;Break
+     Case 9:
+        ;DEY
+				CPU.REG.y=CPU.REG.y-1
+				CPU.REG.PC=CPU.REG.PC+1
+				;Break
+     Case 10:
+        ;LDY
+				CPU.REG.y=Peek(1,CPU.REG.PC+1,#BYTE)
+				CPU.REG.PC=CPU.REG.PC+2
+				;Break
+     Case 11:
+        ;JSR
+				CPU.SP=CPU.REG.PC
+				CPU.REG.PC=Peek(1,CPU.REG.PC+1,#BYTE)
+				CPU.REG.PC=CPU.REG.PC+2
+				;Break
+     Case 12:
+        ;RTS
+				CPU.CP=CPU.SP
+				CPU.SP=0
+				;Break
+     Default:
+        DebugPrint("Errore, Istruzione non valida.")
+        exec_state=0 
+				Break
+	EndSwitch	
+EndFunction
+
+Function CPU.init_emu()
+	while exec_state=1
+		;Cls
+		;TextOut(500,10,"Reg A:"..CPU.REG.a)
+		;TextOut(500,20,"Reg X:"..CPU.REG.x)
+		;TextOut(500,30,"Reg Y:"..CPU.REG.y)
+		;TextOut(500,40,"ProgCount:"..CPU.REG.PC)
+		;TextOut(500,50,"Flags:"..CPU.REG.Flags)
+		;CPU.Opcode(Peek(1,CPU.REG.PC,#BYTE))
+		;draw_screen()
+	Wend	
+EndFunction
+
+Function CPU.OpenBin()
+	tt=PC_Def
+	file$ = FileRequest("Select some files", "out")
+	OpenFile(1, file$)
+	Repeat 
+		Poke(1,tt,ReadInt(1),#BYTE) 
+		tt=tt+1
+	Until Eof(1)
+	CloseFile(1)
+	for Local i=0 to 399
+		poke(1,Video_Def+i,0,#byte)
+	Next
+	;SetInterval(1, CPU.init_emu, 1000/1000)
+EndFunction
+
+Function draw_screen()
+	Box(490,0,150,100,#BLACK)
+	TextOut(500,10,"Reg A:"..CPU.REG.a)
+	TextOut(500,20,"Reg X:"..CPU.REG.x)
+	TextOut(500,30,"Reg Y:"..CPU.REG.y)
+	TextOut(500,40,"ProgCount:"..CPU.REG.PC)
+	TextOut(500,50,"Flags:"..CPU.REG.Flags)
+	mv=0
+	For Local e=0 to 19 Step 1
+	For Local i=0 to 19 Step 1		
+		Box(posx[i],posy[e],5,5,colori[Peek(1,Video_Def+mv,#byte)])
+		mv=mv+1
+	Next
+	Next
+EndFunction
+	
+SetInterval(1, draw_screen, 1000/25)
+CPU.OpenBin()
+
+StartTimer(1)
+Repeat
+		CPU.Opcode(Peek(1,CPU.REG.PC,#BYTE))
+		CheckEvent		
+		WaitTimer(1, 2)
+Until exec_state=0
+WaitLeftMouse()
