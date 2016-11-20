@@ -62,6 +62,10 @@ Function Assembla(Linea)
 		Case "RTS":	 
 			WriteInt(2,12)
 			Break
+		Case "CMA":
+			WriteInt(2,13)
+			Local inte44=ToNumber(UnrightStr(Linea,4))
+			WriteInt(2,inte44)
 		Default:
 			DebugPrint("Errore di istruzione.")
 			Break

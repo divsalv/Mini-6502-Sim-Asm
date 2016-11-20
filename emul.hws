@@ -9,6 +9,15 @@
 * ciclo degli opcode usando delle	Funzioni indicizate.		*
 * Ringrazio Allanon per avermi consigliato delle funzioni	*
 * indicizate poer velocizare ulteriormente il codice.			*
+***********************************************************
+* 20/11/2016:By Salvatore (divdalv) Di Vincenzo						*
+* Ho modificato il ciclo repeat in modo che continui		 	*
+* anche dopo che l'exec_state è settato a 0, dando la			*
+* possibbilità al video di completare le sue opeazioni.		*
+* Ho anche modificato la pausa con WaiTimer a 0.9, che 		*
+* risulta molto più veloce.																*
+* Ho aggiunto l'OPCODE CMA=Compare A , per eseguire la		*
+* comparazione del registro A.														*
 **********************************************************/
 
 Video_Def=200
@@ -41,7 +50,7 @@ CPU.Opcode[9]=Function() CPU.REG.y=CPU.REG.y-1 CPU.REG.PC=CPU.REG.PC+1 EndFuncti
 CPU.Opcode[10]=Function() CPU.REG.y=Peek(1,CPU.REG.PC+1,#BYTE) CPU.REG.PC=CPU.REG.PC+2 EndFunction ;LDY
 CPU.Opcode[11]=Function() CPU.SP=CPU.REG.PC CPU.REG.PC=Peek(1,CPU.REG.PC+1,#BYTE) CPU.REG.PC=CPU.REG.PC+2 EndFunction ;JSR
 CPU.Opcode[12]=Function() CPU.CP=CPU.SP CPU.SP=0 EndFunction ;RTS
-CPU.Opcode[13]=Function() EndFunction
+CPU.Opcode[13]=Function() If CPU.REG.a=Peek(1,CPU.REG.PC+1,#BYTE) CPU.REG.Flags=1 Else CPU.REG.Flags=0	EndIf CPU.REG.PC=CPU.REG.PC+2	EndFunction ;CMA
 CPU.Opcode[14]=Function() EndFunction
 CPU.Opcode[15]=Function() EndFunction
 CPU.Opcode[16]=Function() EndFunction
@@ -61,6 +70,12 @@ Function CPU.OpenBin()
 EndFunction
 
 Function draw_screen()
+	Box(490,0,150,100,#BLACK) 
+	TextOut(500,10,"Reg A:"..CPU.REG.a)
+	TextOut(500,20,"Reg X:"..CPU.REG.x)
+	TextOut(500,30,"Reg Y:"..CPU.REG.y)
+	TextOut(500,40,"ProgCount:"..CPU.REG.PC)
+	TextOut(500,50,"Flags:"..CPU.REG.Flags)
 	mv=0
 	For Local e=0 to 19 Step 1
 	For Local i=0 to 19 Step 1		
@@ -70,23 +85,15 @@ Function draw_screen()
 	Next
 EndFunction
 
-
 SetInterval(1, draw_screen, 1000/75)	
 CPU.OpenBin()
 
 StartTimer(1)
 Repeat
+		CheckEvent()
 		DisableLineHook()
-		Box(490,0,150,100,#BLACK) 
-		TextOut(500,10,"Reg A:"..CPU.REG.a)
-		TextOut(500,20,"Reg X:"..CPU.REG.x)
-		TextOut(500,30,"Reg Y:"..CPU.REG.y)
-		TextOut(500,40,"ProgCount:"..CPU.REG.PC)
-		TextOut(500,50,"Flags:"..CPU.REG.Flags)
 		CPU.Opcode[Peek(1,CPU.REG.PC,#BYTE)]()
 		EnableLineHook()
-		WaitTimer(1, 6)
-		CheckEvent()
-Until exec_state=0
-TextOut(#CENTER,#CENTER,"EXECUTION COMPLETE..Press Left Mouse for Exit!") ;Flip
-WaitLeftMouse()
+		WaitTimer(1, 0)
+		If exec_state=0 Then TextOut(#CENTER,#CENTER,"Esecuzione Terminata!")		
+Forever		
