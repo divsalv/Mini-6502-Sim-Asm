@@ -4,13 +4,13 @@
 /**********************************************************
 * Cambiamenti:																						*
 ***********************************************************
-* 15/11/2016:	By Salvatore (divdalv) Di Vincenzo					*
+* 15/11/2016:	By Salvatore (divsalv) Di Vincenzo					*
 * Velocizato il processo di esecuzione, ed ho riscritto il*
 * ciclo degli opcode usando delle	Funzioni indicizate.		*
 * Ringrazio Allanon per avermi consigliato delle funzioni	*
 * indicizate poer velocizare ulteriormente il codice.			*
 ***********************************************************
-* 20/11/2016:By Salvatore (divdalv) Di Vincenzo						*
+* 20/11/2016:By Salvatore (divsalv) Di Vincenzo						*
 * Ho modificato il ciclo repeat in modo che continui		 	*
 * anche dopo che l'exec_state è settato a 0, dando la			*
 * possibbilità al video di completare le sue opeazioni.		*
